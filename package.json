@@ -1,0 +1,9 @@
+{
+  "name": "nick-light-card",
+  "version": "0.1.0",
+  "devDependencies": {
+    "rollup": "^4.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-commonjs": "^25.0.0"
+  }
+}

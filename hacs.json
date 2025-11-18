@@ -1,6 +1,6 @@
 {
   "name": "nick-light-card",
-  "filename": "nick-light-card.js",
+  "filename": "dist/nick-light-card.js",
   "render_readme": true,
-  "content_in_root": true
+  "content_in_root": false
 }
