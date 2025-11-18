@@ -1,6 +1,5 @@
-const LitElement = window.LitElement || Object.getPrototypeOf(customElements.get("home-assistant-main"));
-const html = window.html;
-const css = LitElement.prototype.constructor.css;
+import { LitElement, html, css } from "lit-element";
+
 
 class NickLightCard extends LitElement {
   static get properties() {
