@@ -1,16 +1,29 @@
 name: Build
-on: [push]
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - run: npm install
-      - run: npx rollup -c
-      - uses: actions/upload-artifact@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build with Rollup
+        run: npx rollup -c
+
+      - name: Upload built artifact
+        uses: actions/upload-artifact@v4
         with:
           name: nick-light-card
           path: dist/nick-light-card.js
