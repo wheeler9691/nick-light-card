@@ -2,7 +2,5 @@
   "name": "nick-light-card",
   "filename": "nick-light-card.js",
   "render_readme": true,
-  "content_in_root": true,
-  "country": "US",
-  "homeassistant": "2024.6.0"
+  "content_in_root": true
 }
