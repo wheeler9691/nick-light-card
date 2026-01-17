@@ -1,183 +1,215 @@
-import { LitElement, html, css } from "lit-element";
-
+import { LitElement, html, css } from 'lit';
 
 class NickLightCard extends LitElement {
   static get properties() {
     return {
-      hass: {},
-      _config: {},
-      _mode: { type: String }, // "brightness" or "color_temp"
+      hass: { type: Object },
+      _config: { type: Object },
+      _mode: { type: String },
+      _effectsMenuOpen: { type: Boolean }
     };
   }
 
   static get styles() {
     return css`
       :host {
-        --nick-light-card-border-radius: 12px;
-        --nick-light-card-padding: 8px 10px;
-        --nick-light-card-bg: rgba(0, 0, 0, 0.15);
-        --nick-light-card-bg-on: rgba(255, 255, 255, 0.06);
-        --nick-light-card-border: 1px solid rgba(255, 255, 255, 0.1);
-        --nick-light-card-icon-size: 24px;
-        --nick-light-card-button-height: 26px;
-        --nick-light-card-button-min-width: 32px;
-        --nick-light-card-button-padding: 0 8px;
-        --nick-light-card-button-radius: 999px;
-        --nick-light-card-slider-width: 160px;
-        --nick-light-card-slider-height: 6px;
         display: block;
       }
 
       .card {
-        box-sizing: border-box;
-        border-radius: var(--nick-light-card-border-radius);
-        padding: var(--nick-light-card-padding);
-        border: var(--nick-light-card-border);
-        background: var(--nick-light-card-bg);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
+        padding: 10px 12px;
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
         cursor: pointer;
+        transition: background 0.2s ease;
       }
 
       .card.on {
-        background: var(--nick-light-card-bg-on);
+        background: rgba(255, 255, 255, 0.06);
       }
 
-      .left {
+      .card:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .card.on:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .left-section {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         flex: 1;
         min-width: 0;
       }
 
       .icon {
-        width: var(--nick-light-card-icon-size);
-        height: var(--nick-light-card-icon-size);
+        width: 24px;
+        height: 24px;
         flex-shrink: 0;
+        color: var(--primary-text-color);
       }
 
       .name {
         font-size: 14px;
         font-weight: 500;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--primary-text-color);
       }
 
-      .buttons {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin-left: 6px;
-      }
-
-      .right {
+      .button-group {
         display: flex;
         align-items: center;
         gap: 6px;
-        margin-left: auto;
-        cursor: default;
       }
 
-      button.icon-btn {
-        height: var(--nick-light-card-button-height);
-        min-width: var(--nick-light-card-button-min-width);
-        padding: var(--nick-light-card-button-padding);
-        border-radius: var(--nick-light-card-button-radius);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        background: rgba(0, 0, 0, 0.3);
-        color: var(--primary-text-color);
+      .right-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      .btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        font-size: 11px;
-        line-height: 1;
+        min-width: 32px;
+        height: 28px;
+        padding: 0 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        color: var(--primary-text-color);
         cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 11px;
+        gap: 4px;
       }
 
-      button.icon-btn.active {
-        background: rgba(255, 255, 255, 0.12);
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+
+      .btn:active {
+        transform: scale(0.95);
+      }
+
+      .btn.active {
+        background: rgba(255, 255, 255, 0.15);
         border-color: rgba(255, 255, 255, 0.4);
       }
 
-      button.icon-btn:focus {
-        outline: none;
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+      .btn ha-icon {
+        width: 18px;
+        height: 18px;
+        pointer-events: none;
       }
 
-      .slider-wrapper {
-        width: var(--nick-light-card-slider-width);
-        display: flex;
-        align-items: center;
+      .slider-container {
+        width: 160px;
+        position: relative;
       }
 
       input[type="range"] {
-        -webkit-appearance: none;
         width: 100%;
-        height: var(--nick-light-card-slider-height);
-        border-radius: 999px;
-        background-color: rgba(255, 255, 255, 0.08);
+        height: 6px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
         outline: none;
-        margin: 0;
-        padding: 0;
+        cursor: pointer;
       }
 
       input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border: 2px solid rgba(0, 0, 0, 0.2);
         border-radius: 50%;
-        background: #fff;
-        border: 2px solid rgba(0, 0, 0, 0.5);
         cursor: pointer;
-        margin-top: calc((var(--nick-light-card-slider-height) - 14px) / 2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: transform 0.1s ease;
+      }
+
+      input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
       }
 
       input[type="range"]::-moz-range-thumb {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border: 2px solid rgba(0, 0, 0, 0.2);
         border-radius: 50%;
-        background: #fff;
-        border: 2px solid rgba(0, 0, 0, 0.5);
         cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
       input[type="range"]::-moz-range-track {
-        height: var(--nick-light-card-slider-height);
-        border-radius: 999px;
+        height: 6px;
         background: transparent;
+        border-radius: 8px;
       }
 
       .effects-menu {
         position: absolute;
-        z-index: 1000;
-        margin-top: 4px;
-        padding: 4px 0;
-        border-radius: 8px;
-        background: var(--card-background-color, #222);
+        top: calc(100% + 4px);
+        right: 0;
+        min-width: 160px;
+        max-height: 300px;
+        overflow-y: auto;
+        background: var(--card-background-color, #1c1c1c);
         border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        min-width: 140px;
+        z-index: 1000;
+        padding: 4px 0;
       }
 
       .effects-menu-item {
-        padding: 4px 10px;
-        font-size: 12px;
+        padding: 8px 12px;
+        font-size: 13px;
         cursor: pointer;
         white-space: nowrap;
+        color: var(--primary-text-color);
+        transition: background 0.15s ease;
       }
 
       .effects-menu-item:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .effects-menu-item.active {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .button-wrapper {
+        position: relative;
       }
     `;
   }
 
+  constructor() {
+    super();
+    this._mode = 'brightness';
+    this._effectsMenuOpen = false;
+  }
+
   setConfig(config) {
     if (!config.entity) {
-      throw new Error("Entity is required");
+      throw new Error('You must specify an entity');
     }
     this._config = config;
   }
@@ -186,307 +218,314 @@ class NickLightCard extends LitElement {
     return 1;
   }
 
+  // Entity helpers
   _getEntity() {
-    if (!this.hass || !this._config || !this._config.entity) return null;
+    if (!this.hass || !this._config?.entity) return null;
     return this.hass.states[this._config.entity];
   }
 
-  _ensureMode(stateObj) {
-    if (!stateObj) return;
-    const attrs = stateObj.attributes || {};
-    const supportsBrightness =
-      "brightness" in attrs ||
-      (Array.isArray(attrs.supported_color_modes) &&
-        attrs.supported_color_modes.some((m) =>
-          ["brightness", "hs", "rgb", "xy", "color_temp"].includes(m)
-        ));
-    const supportsColorTemp =
-      "color_temp" in attrs ||
-      (Array.isArray(attrs.supported_color_modes) &&
-        attrs.supported_color_modes.includes("color_temp"));
+  _getMotionEntity() {
+    if (!this.hass || !this._config?.motion_entity) return null;
+    return this.hass.states[this._config.motion_entity];
+  }
 
-    if (!supportsBrightness && !supportsColorTemp) {
-      this._mode = undefined;
-      return;
-    }
-    if (!supportsBrightness && supportsColorTemp) {
-      this._mode = "color_temp";
-      return;
-    }
-    if (supportsBrightness && !supportsColorTemp) {
-      this._mode = "brightness";
-      return;
-    }
+  // Feature detection
+  _supportsBrightness(stateObj) {
+    if (!stateObj) return false;
+    const attrs = stateObj.attributes || {};
+    const modes = attrs.supported_color_modes || [];
+    return modes.some(mode =>
+      ['brightness', 'hs', 'rgb', 'rgbw', 'rgbww', 'xy', 'color_temp'].includes(mode)
+    );
+  }
+
+  _supportsColorTemp(stateObj) {
+    if (!stateObj) return false;
+    const modes = stateObj.attributes?.supported_color_modes || [];
+    return modes.includes('color_temp');
+  }
+
+  _supportsEffects(stateObj) {
+    if (!stateObj) return false;
+    const effectList = stateObj.attributes?.effect_list || [];
+    return effectList.length > 0;
+  }
+
+  // Mode management
+  _initializeMode(stateObj) {
     if (!this._mode) {
-      this._mode = "brightness";
+      const supportsBrightness = this._supportsBrightness(stateObj);
+      const supportsTemp = this._supportsColorTemp(stateObj);
+
+      if (supportsBrightness) {
+        this._mode = 'brightness';
+      } else if (supportsTemp) {
+        this._mode = 'color_temp';
+      }
     }
   }
 
-  _hasBrightness(stateObj) {
-    if (!stateObj) return false;
+  _toggleMode() {
+    this._mode = this._mode === 'brightness' ? 'color_temp' : 'brightness';
+  }
+
+  // Slider calculations
+  _getSliderConfig(stateObj) {
+    if (!stateObj) {
+      return { min: 0, max: 255, value: 0, background: this._getDefaultGradient() };
+    }
+
     const attrs = stateObj.attributes || {};
-    return (
-      "brightness" in attrs ||
-      (Array.isArray(attrs.supported_color_modes) &&
-        attrs.supported_color_modes.some((m) =>
-          ["brightness", "hs", "rgb", "xy", "color_temp"].includes(m)
-        ))
-    );
+
+    if (this._mode === 'color_temp' && this._supportsColorTemp(stateObj)) {
+      return {
+        min: attrs.min_mireds || 153,
+        max: attrs.max_mireds || 500,
+        value: attrs.color_temp || attrs.min_mireds || 153,
+        background: this._getTempGradient()
+      };
+    }
+
+    // Brightness mode
+    return {
+      min: 1,
+      max: 255,
+      value: attrs.brightness ?? 255,
+      background: this._getBrightnessGradient(stateObj)
+    };
   }
 
-  _hasColorTemp(stateObj) {
-    if (!stateObj) return false;
-    const attrs = stateObj.attributes || {};
-    return (
-      "color_temp" in attrs ||
-      (Array.isArray(attrs.supported_color_modes) &&
-        attrs.supported_color_modes.includes("color_temp"))
-    );
-  }
-
-  _hasEffects(stateObj) {
-    if (!stateObj) return false;
-    const attrs = stateObj.attributes || {};
-    return Array.isArray(attrs.effect_list) && attrs.effect_list.length > 0;
-  }
-
-  _hasMotion() {
-    return !!this._config.motion_entity;
-  }
-
-  _showModeToggle(stateObj) {
-    return this._hasBrightness(stateObj) && this._hasColorTemp(stateObj);
-  }
-
-  _currentSliderMode(stateObj) {
-    this._ensureMode(stateObj);
-    return this._mode;
-  }
-
-  _computeBrightnessGradient(stateObj) {
+  _getBrightnessGradient(stateObj) {
     const attrs = stateObj?.attributes || {};
-    let hs = attrs.hs_color;
-    let gradient;
-    if (Array.isArray(hs) && hs.length >= 2) {
-      const h = hs[0];
-      const s = Math.max(30, Math.min(100, hs[1] || 100));
-      gradient = `linear-gradient(to right,
-        hsla(${h}, ${s}%, 50%, 0.15),
-        hsla(${h}, ${s}%, 50%, 1)
-      )`;
-    } else if (Array.isArray(attrs.rgb_color) && attrs.rgb_color.length >= 3) {
+
+    if (attrs.hs_color && Array.isArray(attrs.hs_color)) {
+      const [h, s] = attrs.hs_color;
+      const saturation = Math.max(30, Math.min(100, s || 100));
+      return `linear-gradient(to right,
+        hsla(${h}, ${saturation}%, 20%, 0.2),
+        hsla(${h}, ${saturation}%, 50%, 1))`;
+    }
+
+    if (attrs.rgb_color && Array.isArray(attrs.rgb_color)) {
       const [r, g, b] = attrs.rgb_color;
-      gradient = `linear-gradient(to right,
-        rgba(${r}, ${g}, ${b}, 0.15),
-        rgba(${r}, ${g}, ${b}, 1)
-      )`;
-    } else {
-      gradient = "linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,1))";
+      return `linear-gradient(to right,
+        rgba(${r}, ${g}, ${b}, 0.2),
+        rgba(${r}, ${g}, ${b}, 1))`;
     }
-    return gradient;
+
+    return this._getDefaultGradient();
   }
 
-  _computeTempGradient(stateObj) {
-    // Simple warm -> cool gradient
-    return "linear-gradient(to right, #ffb74d, #fffde7, #90caf9)";
+  _getTempGradient() {
+    return 'linear-gradient(to right, #ff9800, #fff3e0, #90caf9)';
   }
 
-  _onCardClick(e) {
+  _getDefaultGradient() {
+    return 'linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 1))';
+  }
+
+  // Event handlers
+  _handleCardClick(e) {
     e.stopPropagation();
-    const stateObj = this._getEntity();
-    if (!stateObj || !this.hass) return;
-    const isOn = stateObj.state === "on";
-    this.hass.callService("light", "toggle", {
-      entity_id: stateObj.entity_id,
+    const entity = this._getEntity();
+    if (!entity) return;
+
+    this.hass.callService('light', 'toggle', {
+      entity_id: entity.entity_id
     });
   }
 
-  _onEffectsClick(e) {
+  _handleModeToggle(e) {
     e.stopPropagation();
-    this._effectsOpen = !this._effectsOpen;
-    this.requestUpdate();
+    this._toggleMode();
   }
 
-  _onEffectSelect(effect, e) {
+  _handleSliderChange(e) {
     e.stopPropagation();
-    const stateObj = this._getEntity();
-    if (!stateObj || !this.hass) return;
-    this.hass.callService("light", "turn_on", {
-      entity_id: stateObj.entity_id,
-      effect: effect,
-    });
-    this._effectsOpen = false;
-    this.requestUpdate();
-  }
+    const entity = this._getEntity();
+    if (!entity) return;
 
-  _onMotionClick(e) {
-    e.stopPropagation();
-    if (!this._config.motion_entity || !this.hass) return;
-    const motionEntity = this.hass.states[this._config.motion_entity];
-    const domain = motionEntity ? motionEntity.entity_id.split(".")[0] : "input_boolean";
-    let service = "toggle";
-    if (domain === "input_boolean") {
-      service = "toggle";
-    } else if (domain === "switch") {
-      service = "toggle";
+    const value = parseInt(e.target.value);
+    const serviceData = { entity_id: entity.entity_id };
+
+    if (this._mode === 'color_temp') {
+      serviceData.color_temp = value;
     } else {
-      service = "toggle";
+      serviceData.brightness = value;
     }
-    this.hass.callService(domain, service, {
-      entity_id: this._config.motion_entity,
+
+    this.hass.callService('light', 'turn_on', serviceData);
+  }
+
+  _handleEffectsToggle(e) {
+    e.stopPropagation();
+    this._effectsMenuOpen = !this._effectsMenuOpen;
+  }
+
+  _handleEffectSelect(effect, e) {
+    e.stopPropagation();
+    const entity = this._getEntity();
+    if (!entity) return;
+
+    this.hass.callService('light', 'turn_on', {
+      entity_id: entity.entity_id,
+      effect: effect
+    });
+
+    this._effectsMenuOpen = false;
+  }
+
+  _handleMotionToggle(e) {
+    e.stopPropagation();
+    const motionEntity = this._getMotionEntity();
+    if (!motionEntity) return;
+
+    const domain = motionEntity.entity_id.split('.')[0];
+    this.hass.callService(domain, 'toggle', {
+      entity_id: motionEntity.entity_id
     });
   }
 
-  _onModeToggleClick(e) {
-    e.stopPropagation();
-    const stateObj = this._getEntity();
-    if (!stateObj) return;
-    const hasB = this._hasBrightness(stateObj);
-    const hasT = this._hasColorTemp(stateObj);
-    if (!hasB || !hasT) return;
-    this._mode = this._mode === "brightness" ? "color_temp" : "brightness";
-    this.requestUpdate();
+  // Rendering helpers
+  _renderEffectsButton(stateObj) {
+    if (!this._supportsEffects(stateObj)) return null;
+
+    const effectList = stateObj.attributes?.effect_list || [];
+    const currentEffect = stateObj.attributes?.effect;
+
+    return html`
+      <div class="button-wrapper">
+        <button
+          class="btn ${this._effectsMenuOpen ? 'active' : ''}"
+          @click=${this._handleEffectsToggle}
+          title="Light Effects"
+        >
+          <ha-icon icon="mdi:auto-fix"></ha-icon>
+        </button>
+
+        ${this._effectsMenuOpen ? html`
+          <div class="effects-menu" @click=${e => e.stopPropagation()}>
+            ${effectList.map(effect => html`
+              <div
+                class="effects-menu-item ${currentEffect === effect ? 'active' : ''}"
+                @click=${e => this._handleEffectSelect(effect, e)}
+              >
+                ${effect}
+              </div>
+            `)}
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 
-  _onSliderChange(e) {
-    e.stopPropagation();
-    const stateObj = this._getEntity();
-    if (!stateObj || !this.hass) return;
-    const mode = this._currentSliderMode(stateObj);
-    const value = Number(e.target.value);
-    const payload = { entity_id: stateObj.entity_id };
-    if (mode === "color_temp") {
-      payload.color_temp = value;
-    } else {
-      // default to brightness
-      payload.brightness = value;
-    }
-    this.hass.callService("light", "turn_on", payload);
+  _renderMotionButton() {
+    const motionEntity = this._getMotionEntity();
+    if (!motionEntity) return null;
+
+    const isOn = motionEntity.state === 'on';
+
+    return html`
+      <button
+        class="btn ${isOn ? 'active' : ''}"
+        @click=${this._handleMotionToggle}
+        title="Motion Detection"
+      >
+        <ha-icon icon="mdi:run-fast"></ha-icon>
+      </button>
+    `;
+  }
+
+  _renderModeToggle(stateObj) {
+    const supportsBrightness = this._supportsBrightness(stateObj);
+    const supportsTemp = this._supportsColorTemp(stateObj);
+
+    if (!supportsBrightness || !supportsTemp) return null;
+
+    const icon = this._mode === 'color_temp' ? 'mdi:thermometer' : 'mdi:brightness-6';
+    const title = this._mode === 'color_temp' ? 'Color Temperature' : 'Brightness';
+
+    return html`
+      <button
+        class="btn"
+        @click=${this._handleModeToggle}
+        title="Toggle ${title}"
+      >
+        <ha-icon icon="${icon}"></ha-icon>
+      </button>
+    `;
+  }
+
+  _renderSlider(stateObj) {
+    const supportsBrightness = this._supportsBrightness(stateObj);
+    const supportsTemp = this._supportsColorTemp(stateObj);
+
+    if (!supportsBrightness && !supportsTemp) return null;
+
+    const config = this._getSliderConfig(stateObj);
+
+    return html`
+      <div class="slider-container">
+        <input
+          type="range"
+          min="${config.min}"
+          max="${config.max}"
+          .value="${String(config.value)}"
+          style="background: ${config.background}"
+          @change=${this._handleSliderChange}
+          @input=${this._handleSliderChange}
+        />
+      </div>
+    `;
   }
 
   render() {
     const stateObj = this._getEntity();
+
     if (!stateObj) {
-      return html`<ha-card>Entity not found</ha-card>`;
-    }
-
-    const attrs = stateObj.attributes || {};
-    const isOn = stateObj.state === "on";
-
-    const hasB = this._hasBrightness(stateObj);
-    const hasT = this._hasColorTemp(stateObj);
-    const hasEffects = this._hasEffects(stateObj);
-    const hasMotion = this._hasMotion();
-    const showModeToggle = this._showModeToggle(stateObj);
-    const mode = this._currentSliderMode(stateObj) || (hasB ? "brightness" : hasT ? "color_temp" : "brightness");
-
-    let sliderMin = 0;
-    let sliderMax = 255;
-    let sliderVal = 0;
-    let sliderBg = "linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,1))";
-
-    if (mode === "color_temp" && hasT) {
-      sliderMin = attrs.min_mireds || 153;
-      sliderMax = attrs.max_mireds || 500;
-      sliderVal = attrs.color_temp || sliderMax;
-      sliderBg = this._computeTempGradient(stateObj);
-    } else if (hasB) {
-      sliderMin = 1;
-      sliderMax = 255;
-      sliderVal = attrs.brightness != null ? attrs.brightness : sliderMax;
-      sliderBg = this._computeBrightnessGradient(stateObj);
-    }
-
-    const icon =
-      this._config.icon ||
-      attrs.icon ||
-      (stateObj.entity_id.startsWith("switch.") ? "mdi:light-switch" : "mdi:lightbulb");
-
-    const motionEntity = hasMotion ? this.hass.states[this._config.motion_entity] : null;
-    const motionOn = motionEntity && motionEntity.state === "on";
-
-    const effectsBtn = hasEffects
-      ? html`
-          <div style="position: relative;">
-            <button class="icon-btn" @click=${this._onEffectsClick.bind(this)}>
-              <ha-icon icon="mdi:auto-fix"></ha-icon>
-            </button>
-            ${this._effectsOpen
-              ? html`<div class="effects-menu" @click=${(e) => e.stopPropagation()}>
-                  ${attrs.effect_list.map(
-                    (eff) => html`<div
-                      class="effects-menu-item"
-                      @click=${(e) => this._onEffectSelect(eff, e)}
-                    >
-                      ${eff}
-                    </div>`
-                  )}
-                </div>`
-              : ""}
+      return html`
+        <ha-card>
+          <div style="padding: 16px; color: var(--error-color);">
+            Entity not found: ${this._config?.entity}
           </div>
-        `
-      : null;
+        </ha-card>
+      `;
+    }
 
-    const motionBtn = hasMotion
-      ? html`
-          <button
-            class="icon-btn ${motionOn ? "active" : ""}"
-            title="Toggle motion"
-            @click=${this._onMotionClick.bind(this)}
-          >
-            <ha-icon icon="mdi:run-fast"></ha-icon>
-          </button>
-        `
-      : null;
+    this._initializeMode(stateObj);
 
-    const modeBtn = showModeToggle
-      ? html`
-          <button
-            class="icon-btn"
-            title="Toggle brightness / temperature"
-            @click=${this._onModeToggleClick.bind(this)}
-          >
-            <ha-icon icon=${mode === "color_temp" ? "mdi:thermometer" : "mdi:brightness-6"}></ha-icon>
-          </button>
-        `
-      : null;
+    const isOn = stateObj.state === 'on';
+    const attrs = stateObj.attributes || {};
+    const icon = this._config.icon || attrs.icon || 'mdi:lightbulb';
+    const name = this._config.name || attrs.friendly_name || stateObj.entity_id;
 
     return html`
-      <div class="card ${isOn ? "on" : ""}" @click=${this._onCardClick.bind(this)}>
-        <div class="left">
-          <ha-icon class="icon" .icon=${icon}></ha-icon>
-          <div class="name">${this._config.name || attrs.friendly_name || stateObj.entity_id}</div>
-          <div class="buttons" @click=${(e) => e.stopPropagation()}>
-            ${effectsBtn} ${motionBtn}
+      <div class="card ${isOn ? 'on' : ''}" @click=${this._handleCardClick}>
+        <div class="left-section">
+          <ha-icon class="icon" .icon="${icon}"></ha-icon>
+          <div class="name">${name}</div>
+
+          <div class="button-group" @click=${e => e.stopPropagation()}>
+            ${this._renderEffectsButton(stateObj)}
+            ${this._renderMotionButton()}
           </div>
         </div>
-        <div class="right" @click=${(e) => e.stopPropagation()}>
-          ${modeBtn}
-          ${hasB || (mode === "color_temp" && hasT)
-            ? html`
-                <div class="slider-wrapper">
-                  <input
-                    type="range"
-                    min=${sliderMin}
-                    max=${sliderMax}
-                    .value=${String(sliderVal)}
-                    style=${`background: ${sliderBg};`}
-                    @change=${this._onSliderChange.bind(this)}
-                  />
-                </div>
-              `
-            : null}
+
+        <div class="right-section" @click=${e => e.stopPropagation()}>
+          ${this._renderModeToggle(stateObj)}
+          ${this._renderSlider(stateObj)}
         </div>
       </div>
     `;
   }
 }
 
-customElements.define("nick-light-card", NickLightCard);
+customElements.define('nick-light-card', NickLightCard);
 
+// Register card with HACS/Lovelace
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "nick-light-card",
-  name: "Nick Light Card",
-  description: "Compact light card with effects, motion toggle, and brightness/temperature slider.",
+  type: 'nick-light-card',
+  name: 'Nick Light Card',
+  description: 'A compact light card with effects, motion control, and brightness/temperature slider'
 });
